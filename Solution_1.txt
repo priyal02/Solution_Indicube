@@ -1,0 +1,82 @@
+--created dummy table which will push data
+CREATE TABLE   SOURCETABLE 
+(
+Customer_Name VARCHAR(255) NOT NULL PRIMARY KEY,
+  Customer_ID VARCHAR(18) NOT NULL,
+  Customer_Open_Date DATE NOT NULL,
+  Last_Consulted_Date DATE  NULL,
+  Vaccination_Type CHAR(5) NULL,
+  Doctor_Consulted CHAR(255) NULL,
+  State CHAR(5) NULL,
+  Country CHAR(5) NULL,
+  Post_Code INT NULL,
+  Date_Of_Birth DATE NULL,
+  Active_Customer CHAR(1) NULL,
+
+)
+
+--insrted dummy data
+INSERT INTO SOURCETABLE VALUES('Alex','123457','20101012','20121013','MVD','Paul','SA','USA',123,'19870603','A')
+
+INSERT INTO SOURCETABLE VALUES('John','123458','20101012','20121013','MVD', '','TN','IND',234,'19870603','A')
+
+INSERT INTO SOURCETABLE VALUES('Mathew','123459','20101012','20121013','MVD', '','WAS','PHIL',456,'19870603','A')
+
+INSERT INTO SOURCETABLE VALUES('Matt','12345','20101012','20121013','MVD', '','BOS','NYC',444,'19870603','A')
+
+INSERT INTO SOURCETABLE VALUES('Jacob','1256','20101012','20121013','MVD','','VIC','AU',678,'19870603','A')
+
+--used cursors 
+-- to create dynamic script for table creation as TABLE_countryname and insrting data on the basis 
+-- of country names
+
+ declare @ctr int,   
+ @SQL1 varchar(256), 
+ @SQL2 varchar(256),  
+ @TableName varchar(256)  
+  
+create table #temptable (TableName sysname)  
+Insert into #temptable   
+ select country from SOURCETABLE   
+  
+--select * from #temptable  
+  
+declare curTables cursor   
+for  
+ select TableName from #temptable  
+  
+open curTables  
+  
+fetch next from curTables into @TableName  
+while @@fetch_status = 0  
+begin  
+  set @sql1 =  'CREATE TABLE Table_'+ @TableName +
+  'Customer_Name VARCHAR(255) NOT NULL,
+  Customer_ID VARCHAR(18) NOT NULL,
+  Customer_Open_Date Date(8) NOT NULL,
+  Last_Consulted_Date Date(8)  NULL,
+  Vaccination_Type CHAR(5) NULL,
+  Doctor_Consulted CHAR(255) NULL,
+  State CHAR(5) NULL,
+  Country CHAR(5) NULL,
+  Post_Code INT(5) NULL,
+  Date_Of_Birth DATE(8) NULL,
+  Active_Customer CHAR(1) NULL'  
+   
+ select @SQL1    
+ --exec (@SQL1)  
+ SET @SQL2='INSERT INTO Table_'+@TableName+ 
+ 'SELECT * FROM SOURCETABLE WHERE COUNTRY='+''''+@TableName+''''
+ SELECT @SQL2
+-- exec @sql2
+ fetch next from curTables into @TableName  
+end  
+  
+close curTables  
+deallocate curTables  
+drop table #temptable  
+Return  
+  
+
+
+
